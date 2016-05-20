@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>回头无敌版贪吃蛇</title>
+    <style>
+        #mycanvas{
+            border:1px solid black;
+            float: left;
+        }
+        #d1{
+            width: 110px;
+            height: 100px;
+            border: 1px solid red;
+            float: left;
+        }
+        #d2{
+            width: 110px;
+            height: 100px;
+            border: 1px solid red;
+            float: left;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="mycanvas" width="500" height="500"></canvas>
+    <div id="d1"></div>
+    <div id="d2">
+        <select id="s1">
+            <option value="1">小白</option>
+            <option value="2">入门</option>
+            <option value="3">初觉</option>
+            <option value="4">顿悟</option>
+            <option value="5">羽化</option>
+            <option value="6">超神</option>
+            <option value="7">归一</option>
+        </select>
+        <input type="button" id="button1" value="开始" onclick="star(this)">
+    </div>
+    <script>
+        var d1 = document.getElementById("d1");
+        var s1 = document.getElementById("s1");
+        var c = document.getElementById("mycanvas");
+        var context = c.getContext("2d");
+        var a = 10,b=10;
+        var n = 5;
+        var m = 10;
+        var key = 2;
+        var map = [];
+        var shiwu = [];
+        var su = 300;
+        var t;
+        var toward=0;
+        var to_toward=0;
+        function star(bt){
+            if(bt.value=="开始"){
+                switch (parseInt(s1.value)){    // 控制速度
+                    case 1:
+                        su = 300;
+                        sw(parseInt(s1.value));
+                        break;
+                    case 2:
+                        su = 200;
+                        sw(parseInt(s1.value));
+                        break;
+                    case 3:
+                        su = 100;
+                        sw(parseInt(s1.value));
+                        break;
+                    case 4:
+                        su = 50;
+                        sw(parseInt(s1.value));
+                        break;
+                    case 5:
+                        su = 30;
+                        sw(parseInt(s1.value));
+                        break;
+                    case 6:
+                        su = 10;
+                        sw(parseInt(s1.value));
+                        break;
+                    case 7:
+                        su = 5;
+                        sw(parseInt(s1.value));
+                        break;
+                }
+                t = setInterval(hs,su);
+                /*
+                setInterval() 方法可按照指定的周期（以毫秒计）来调用函数或计算表达式。
+setInterval() 方法会不停地调用函数，直到 clearInterval() 被调用或窗口被关闭。由 setInterval() 返回的 ID 值可用作 clearInterval() 方法的参数。
+
+                 setInterval(code,millisec,lang)
+*/
+                bt.value="暂停";
+            }else{
+                clearInterval(t);
+                bt.value="开始";
+            }
+
+        }
+        document.onkeydown= function (e) {    // 响应按键方程
+            var code = e.keyCode-37;          
+            switch (code){     
+                case 1:    //0x26 UP ARROW 键
+                    key=1;
+                    break;
+                case 2:    // 0x27 RIGHT ARROW 键
+                    key=2;
+                    break;
+                case 3:    // 0x28 DOWN ARROW 键
+                    key=3;
+                    break;
+                case 0:    // 0x25 LEFT ARROW 键
+                    key=0;
+                    break;
+            }
+        };
+        function sw(a){    // 食物方程
+            for(var i=0;i<a;i++){
+                x = Math.floor(Math.random()*50);
+                y = Math.floor(Math.random()*50);
+                context.fillStyle = "red";                              // 定义食物方块的颜色
+                context.fillRect(x*10,y*10,10,10);                // 定义食物方块的横纵坐标与长宽
+                shiwu.push({'x':x,'y':y});                               // 利用push方法增加新食物方块的属性值
+            }
+        }
+        function hs(){    // 蛇方程
+            if(a>490||b>490||a<0||b<0){    // 碰壁方程
+                alert("碰壁了!");
+                window.location.reload();
+            }
+            d1.innerHTML = "当前长度:"+n+"<br/>当前坐标X:"+a/10+"<br/>当前坐标Y:"+b/10;    // 在第二个框内输入坐标和长度
+            switch(key){    // 通过之前选定的按键代码控制蛇的运动
+                case 0:
+                    a-=m;    // left
+                    toward = 2;
+                    break;
+                case 1:      // up
+                    b-=m;
+                    toward = 3;
+                    break;
+                case 2:      // right
+                    a+=m;
+                    to_toward = 2;
+                    break;
+                case 3:      // down
+                    b+=m;
+                    to_toward = 3;
+                    break;
+            }
+
+            for(var i=0;i<map.length;i++){    // 撞自己方程                                                      TODO
+                /*
+                if( parseInt(map[i].a)==a && parseInt(map[i].b)==b){
+                    alert("撞到自己了！");
+                    window.location.reload();
+                }
+                */
+                if( parseInt(map[i].a)==a && parseInt(map[i].b)==b && to_toward != toward){
+                    alert("撞到自己了！");
+                    window.location.reload();
+                }
+            }
+            // 绘制蛇的尾巴前进和蛇的可见性
+            context.fillStyle = "red";      // No influence   colore
+            context.fillRect(a,b,10,10);  // 可见性（不影响死亡）
+            map.push({'a':a,'b':b});        // (让尾巴前进)（不影响死亡）
+            if(map.length>n){               // 控制蛇的长度
+                var c1=map.shift();        // 把数组的第一个元素从其中删除  (让尾巴前进)
+                context.clearRect(c1['a'],c1['b'],m,m);    // 在给定矩形内清空一个矩形 (让尾巴前进)
+            }
+            // 控制生成新食物
+            for(var i=0;i<shiwu.length;i++){
+                if((parseInt(shiwu[i].x)*10==a)&&(parseInt(shiwu[i].y)*10==b)){
+                    n++;
+                    sw(1);
+                    shiwu.remove(i);
+                }
+            }
+        }
+        /**
+         *删除数组指定下标或指定对象 （貌似没有什么效果）
+         */
+        Array.prototype.remove=function(obj){
+            for(var i =0;i <this.length;i++){
+                var temp = this[i];
+                if(!isNaN(obj)){
+                    temp=i;
+                }
+                if(temp == obj){
+                    for(var j = i;j <this.length;j++){
+                        this[j]=this[j+1];
+                    }
+                    this.length = this.length-1;
+                }
+            }
+        }
+
+    </script>
+    <footer>&copy;<a href="http://github.com/ZaleJ/" target="blank">季小伦</a></footer>
+</body>
+</html>
